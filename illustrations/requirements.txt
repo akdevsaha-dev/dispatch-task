@@ -8,3 +8,21 @@ Function requirement
 - job status tracking
 - logging
 - delayed jobs
+
+
+
+-->// Example payload
+---------------------
+
+{
+    id: "233441fa1t21",
+    type: "send_email",
+    status: ""
+    payload: {
+        to : "example@gmail.com",
+    },
+    maxRetries: 3
+    retryCount: 0,
+}
+
+---------------------

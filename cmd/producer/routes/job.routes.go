@@ -7,7 +7,6 @@ import (
 )
 
 func RegisterJobRoute(mux *http.ServeMux) {
-
 	jobHandler := http.HandlerFunc(handlers.JobHandler)
-	mux.Handle("/jobs", jobHandler)
+	mux.Handle("POST /jobs", jobHandler)
 }
