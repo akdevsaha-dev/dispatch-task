@@ -1,0 +1,10 @@
+Function requirement
+
+- Create jobs
+- process jobs
+- multiple workers
+- retries
+- dead letter queues
+- job status tracking
+- logging
+- delayed jobs
