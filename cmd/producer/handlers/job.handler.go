@@ -3,63 +3,27 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/akdevsaha-dev/dispatch-task/internal/queue"
 )
 
-type JobStatus string
-
-const (
-	StatusPending    JobStatus = "pending"
-	StatusRunning    JobStatus = "running"
-	StatusCompleted  JobStatus = "completed"
-	StatusFailed     JobStatus = "failed"
-	StatusRetrying   JobStatus = "retrying"
-	StatusDeadLetter JobStatus = "dead_letter"
-)
-
-type CreateJobRequest struct {
-	Type    string          `json:"type"`
-	Paylaod json.RawMessage `json:"payload"`
+type JobHandler struct {
+	producer *queue.Producer
 }
 
-type Job struct {
-	Id         string          `json:"id"`
-	Type       string          `json:"type"`
-	Payload    json.RawMessage `json:"payload"`
-	Status     JobStatus       `json:"job_status"`
-	MaxRetries int             `json:"max_retries"`
-	RetryCount int             `json:"retry_count"`
-	CreatedAt  time.Time       `json:"created_at"`
+func NewJobHandler(p *queue.Producer) *JobHandler {
+	return &JobHandler{producer: p}
 }
-
-type CreateJobResponse struct {
-	JobID string `json:"job_id"`
-}
-
-func JobHandler(w http.ResponseWriter, r *http.Request) {
-	var req CreateJobRequest
+func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
+	var req queue.CreateJobRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-	job := Job{
-		Id:         uuid.NewString(),
-		Type:       req.Type,
-		Payload:    req.Paylaod,
-		Status:     StatusPending,
-		MaxRetries: 3,
-		RetryCount: 0,
-		CreatedAt:  time.Now(),
-	}
-
-	data, err := json.Marshal(job)
+	resp, err := h.producer.Enqueue(r.Context(), req)
 	if err != nil {
-		http.Error(w, "Filed to create job", http.StatusInternalServerError)
+		http.Error(w, "failed to enqueue job", http.StatusInternalServerError)
+		return
 	}
-	response := CreateJobResponse{
-		JobID: job.Id,
-	}
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(resp)
 }

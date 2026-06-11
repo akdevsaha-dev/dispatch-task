@@ -7,7 +7,7 @@ Function requirement
 - dead letter queues
 - job status tracking
 - logging
-- delayed jobs
+- delayed jobs    ----->>> later priority
 
 
 
@@ -26,3 +26,30 @@ Function requirement
 }
 
 ---------------------
+
+
+\\
+Important functionities to check mark
+
+in a simple queue we will do something like this
+
+producer || ----> redis queue ----> workers
+//
+
+------------------
+
+we will implement 
+///// Retries --> 
+
+when a job fails we put them in a sepereteQueue
+
+we define max retries
+if smth goes wrong we retry 
+think exponentially instead of linear
+
+10s --> 20s --> 40s
+
+
+//////. DLQ ---->
+when the jobs fails for more than 3 times if deleted we might lose important data
+so we create a seperate queue and store the jobs there.
